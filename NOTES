@@ -1,0 +1,35 @@
+include all bibliography items as individual files, and use the basename for the
+name of the pdf, etc., as well.
+
+publications/
+  Dunn2000.json
+  Dunn2000.pdf
+  Dunn2000.webloc
+  
+  
+
+bootstrap3 style list groups::
+
+  <div class="list-group">
+    <a href="#" class="list-group-item">
+      <h4 class="list-group-item-heading">List group item heading</h4>
+      <p class="list-group-item-text">Donec id elit non mi porta gravida at
+      eget metus. Maecenas sed diam eget risus varius blandit.</p>
+    </a>
+    <a href="#" class="list-group-item">
+      <h4 class="list-group-item-heading">List group item heading</h4>
+      <p class="list-group-item-text">Donec id elit non mi porta gravida at
+      eget metus. Maecenas sed diam eget risus varius blandit.</p> 
+    </a>
+  </div>
+  
+  
+Tiny buttons::
+
+  <span class="label label-default">Gray</span> PDF
+  <span class="label label-primary">Red</span>
+  <span class="label label-success">Green</span> Open Access
+  <span class="label label-warning">Purple</span>
+  <span class="label label-danger">Orange</span> 
+  <span class="label label-info">Blue</span>
+
