@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import json
+from string import ascii_letters
 
 class Publication(object):
 
@@ -11,7 +11,8 @@ class Publication(object):
         try:
             assert self.author
         except AttributeError:
-            raise AttributeError("No author in", self.__dict__)
+            raise InvalidPublicationData('No author in "{}"'.format(
+                    d["title"]))
         return
 
     def format_author(self):
@@ -21,34 +22,94 @@ class Publication(object):
             author_list.append("{given} {family}".format(**author))
         return ", ".join(author_list)
 
+    def format_basename(self):
+        elements = list()
+        elements.append(self.author[0]["family"])
+        if len(self.author) > 1:
+            elements.append("et_al")
+        elements.append(str(self.date))
+        title = "".join([c for c in self.title if c in ascii_letters+" "])
+        elements.append("_".join(title.split()[:4]))
+        return "_".join(elements)
+
     @property
     def date(self):
-        return self.issued["date-parts"][0][0]
+        """Date for sorting"""
+        try:
+            return int(self.issued["date-parts"][0][0])
+        except ValueError:
+            return self.issued["date-parts"][0][0]
 
     def format_date(self):
         return "-".join([e[0] for e in self.issued["date-parts"]])
 
+    def __repr__(self):
+        return '<{} "{}">'.format(self.__class__.__name__, self.title) 
+
 class Article(Publication):
     
+    def get_volume_issue(self):
+        try:
+            volume=self.volume
+        except AttributeError:
+            volume=None
+        try:
+            issue=self.issue
+        except AttributeError:
+            issue=None
+        if volume and issue:
+            return "{volume}, {issue}".format(volume=volume, issue=issue)
+        else:
+            return volume or issue or ""
+
     def render(self):
 
-        return ("{author}. {date}. {title}. <i>{journal}</i>. "
-                "{volume}, {issue}:{page}.").format(
+        return ("{author}. {date}. {title}. {journal}. "
+                "{volumeissue}:{page}.").format(
                 author=self.format_author(),
                 date=self.format_date(),
                 title=self.title,
+                volumeissue=self.get_volume_issue(),
                 journal=self.container_title,
-                volume=self.volume,
-                issue=self.issue,
-                page=self.page)
+                page=getattr(self, "page", ""))
+
+    def format_source_html(self):
+
+        return "<i>{journal}</i>. {volumeissue}:{page}.".format(
+                author=self.format_author(),
+                date=self.format_date(),
+                title=self.title,
+                volumeissue=self.get_volume_issue(),
+                journal=self.container_title,
+                page=getattr(self, "page", ""))
 
 class Chapter(Publication):
-    pass
+
+    def format_editor(self):
+        editor_list = ["{given} {family}".format(**editor) for editor
+                in self.editor]
+        return ", ".join(editor_list)
+
+    def format_source_html(self):
+
+        return "In: {editor} ({eds}) {booktitle}. {publ}.  {page}".format(
+                editor=self.format_editor(),
+                eds="editors" if len(self.editor) > 1 else "editor",
+                booktitle=self.container_title,
+                publ=self.publisher,
+                page=getattr(self, "page", ""))
 
 class Thesis(Publication):
-    pass
+
+    def format_source_html(self):
+        return "{genre} Dissertation, {university}.".format(
+                genre=self.genre,
+                university=self.publisher)
 
 class UnknownPublicationType(Exception):
+    pass
+
+class InvalidPublicationData(Exception):
     pass
 
 def constructor(jsonobj):
@@ -61,7 +122,5 @@ def constructor(jsonobj):
     try:
         return classes[pubtype](jsonobj)
     except KeyError:
-        print("WARNING: unknown type", pubtype)
         raise UnknownPublicationType
-
 
