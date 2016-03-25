@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import json
 import argparse
+import datetime
+from textwrap import dedent
 import sys
 from FormatJSONBib import *
 """
@@ -52,7 +54,19 @@ def main():
             else:
                 raise
 
-    print("<h1>Publications</h1>")
+    print(dedent("""\
+            <!--
+            .. title: Publications
+            .. slug: 
+            .. date: 
+            .. tags:
+            .. category:
+            .. link:
+            .. description:
+            .. type: text
+            -->
+            """.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))))
+
     print('<div class="list-group">')
     for pub in sorted(pubs, key=lambda p: ((-1 * p.date), p.format_author())):
         url = getattr(pub, "pdf_path", None)
