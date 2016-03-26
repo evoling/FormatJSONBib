@@ -57,7 +57,7 @@ def main():
                 item.pop(key)
         if not args.dry_run:
             with open(filename, "w") as fileobj:
-                json.dump(item, fileobj)
+                json.dump(item, fileobj, sort_keys=True, indent=4)
             
 
 if __name__ == "__main__":
