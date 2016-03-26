@@ -8,6 +8,5 @@ setup(name='FormatJSONBib',
       author_email='michael.dunn@lingfil.uu.se',
       license='MIT',
       packages=['FormatJSONBib'],
-      scripts=['bin/jsonbib2html.py', 'bin/jsonbib-tidy.py',
-              'bin/jsonbib-rename.py', 'bin/jsonbib-split.py'],
+      scripts=['bin/jsonbib']
       )
