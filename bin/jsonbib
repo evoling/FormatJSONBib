@@ -13,22 +13,30 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers()
 
-    parser_transform = subparsers.add_parser("transform")
+    parser_transform = subparsers.add_parser("transform",
+            description="""Transform JSON bibliography file into html""")
     parser_transform.add_argument("files", type=open, nargs="+", help="JSON files")
     parser_transform.add_argument("-u", "--skip-unknown", action="store_true",
             help="Skip entries with unrecognised type")
     parser_transform.add_argument("-i", "--skip-invalid", action="store_true",
             help="Skip entries that cannot be parsed")
     parser_transform.add_argument("-t", "--theme", choices=["plain",
-            "bootstrap3"], default="plain")
+            "bootstrap3"], default="plain", help="""Bootstrap3 theme includes
+            a Nikola header, and is intended to be used as a complete page. The
+            plain theme is an unordered list intended to be used as a snippet.""")
     parser_transform.set_defaults(func=transform)
 
-    parser_tidy = subparsers.add_parser("tidy")
+    parser_tidy = subparsers.add_parser("tidy", description="""Adjust save
+            format of json file""")
     parser_tidy.add_argument("files", type=open, nargs="+", help="JSON files")
+    parser_tidy.add_argument("-d", "--drop-unused", action="store_true")
+    parser_tidy.add_argument("-m", "--minify", action="store_true")
     parser_tidy.add_argument("-n", "--dry-run", action="store_true")
     parser_tidy.set_defaults(func=tidy)
 
-    parser_pdflink = subparsers.add_parser("pdflink")
+    parser_pdflink = subparsers.add_parser("pdflink", description="""Add a
+            pdf_path field to a json file pointing to a file in the Nikola
+            'files' directory""")
     parser_pdflink.add_argument("jsonpath")
     parser_pdflink.add_argument("pdfpath", help="""The script will take the
             basename of this path, and append it to filedir""")
@@ -38,12 +46,14 @@ def main():
             [%(default)s]""")
     parser_pdflink.set_defaults(func=pdflink)
 
-    parser_rename = subparsers.add_parser("rename")
+    parser_rename = subparsers.add_parser("rename", description="""Rename a
+            json bibliography file by author-date-title""")
     parser_rename.add_argument("files", type=open, nargs="+", help="JSON files")
     parser_rename.add_argument("-n", "--dry-run", action="store_true")
     parser_rename.set_defaults(func=rename)
 
-    parser_split = subparsers.add_parser("split")
+    parser_split = subparsers.add_parser("split", description="""Split a
+            json file with multiple bibliographic entries into individual files""")
     parser_split.add_argument("file", type=open, help="JSON file")
     parser_split.add_argument("-d", "--delete", action="store_true",
             help="""Delete input file after splitting""")
@@ -54,7 +64,7 @@ def main():
     return
 
 def get_default_files_dir():
-    """ascend the directory hierarchy until we find a directory containing a
+    """Ascend the directory hierarchy until we find a directory containing a
     directory called 'files'"""
     home = expanduser("~")
     current = abspath(".")

@@ -1,15 +1,17 @@
 import json
 import datetime
-from sys import stderr
+from sys import stdout, stderr
 from textwrap import dedent
-from os.path import join, basename, exists
+from os.path import join, basename, exists, abspath
 from os import rename as osrename
+from os import remove
 from FormatJSONBib import *
 
 def transform(args):
     pubs = list()
     for fileobj in args.files:
         jsonobj = json.load(fileobj)
+        sentinel(jsonobj, fileobj.name)
         try:
             bibobj = constructor(jsonobj)
             pubs.append(bibobj)
@@ -24,20 +26,19 @@ def transform(args):
             else:
                 raise
 
-    print(dedent("""\
-            <!--
-            .. title: Publications
-            .. slug: 
-            .. date: 
-            .. tags:
-            .. category:
-            .. link:
-            .. description:
-            .. type: text
-            -->
-            """.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))))
-
     if args.theme == "bootstrap3":
+        print(dedent("""\
+                <!--
+                .. title: Publications
+                .. slug: 
+                .. date: 
+                .. tags:
+                .. category:
+                .. link:
+                .. description:
+                .. type: text
+                -->
+                """.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))))
         print('<div class="list-group">')
     else:
         print('<ul>')
@@ -116,23 +117,38 @@ def tidy(args):
     pubs = list()
     for fileobj in args.files:
         item = json.load(fileobj)
+        sentinel(item, fileobj.name)
         filename = fileobj.name
         fileobj.close()
-        for key in list(item.keys()): # ensure it's a dict
-            if key not in keep_fields:
-                if args.dry_run:
-                    print(filename, "drop field", key)
-                item.pop(key)
+        if args.drop_unused:
+            for key in list(item.keys()): # ensure it's a dict
+                if key not in keep_fields:
+                    if args.dry_run:
+                        print(filename, "drop field", key)
+                    item.pop(key)
+        if args.minify:
+            separators = (",", ":")
+            indent = None
+        else:
+            separators = (", ", ": ")
+            indent = 4
         if not args.dry_run:
             with open(filename, "w") as fileobj:
-                json.dump(item, fileobj, sort_keys=True, indent=4)
+                json.dump(item, fileobj, sort_keys=True, indent=indent,
+                        separators=separators)
+        else:
+            json.dump(item, stdout, sort_keys=True, indent=indent,
+                    separators=separators)
+            print()
     return
 
 def pdflink(args):
-    assert args.pdfpath.startswith(args.filedir)
-    relpath = join(".", args.pdfpath[len(args.filedir):])
+    pdfpath, filedir = abspath(args.pdfpath), abspath(args.filedir)
+    assert pdfpath.startswith(filedir)
+    relpath = join(".", pdfpath[len(filedir):])
     with open(args.jsonpath) as fileobj:
         data = json.load(fileobj)
+        sentinel(data, fileobj.name)
         data["pdf_path"] = join(relpath, basename(args.pdfpath))
     with open(args.jsonpath, "w") as fileobj:
         json.dump(data, fileobj, indent=4, sort_keys=True)
@@ -141,6 +157,7 @@ def pdflink(args):
 def rename(args):
     for fileobj in args.files:
         jsonobj = json.load(fileobj)
+        sentinel(jsonobj, fileobj.name)
         try:
             bibobj = constructor(jsonobj)
             source = fileobj.name
@@ -160,12 +177,27 @@ def split(args):
     jsonfilename = args.file.name
     args.file.close()
     i = 0
-    for item in items:
-        filename = "item-{:02}.json".format(i)
-        while exists(filename):
-            i += 1
+    try:
+        assert type(items) == list
+        for item in items:
             filename = "item-{:02}.json".format(i)
-        json.dump(item, open(filename, "w"), indent=4, sort_keys=True)
-        i += 1
-    if args.delete:
-        remove(jsonfilename)
+            while exists(filename):
+                i += 1
+                filename = "item-{:02}.json".format(i)
+            json.dump(item, open(filename, "w"), indent=4, sort_keys=True)
+            i += 1
+        if args.delete:
+            remove(jsonfilename)
+    except AssertionError:
+        print("Nothing to split:", jsonfilename, file=stderr)
+
+def sentinel(data, name):
+    """Test that data if a valid bibliography object"""
+    try:
+        msg = ("File {} is not an individual bibliography file (might "
+                "need 'split')".format( name))
+        assert type(data) == dict
+        msg = "File {} is missing a title field".format(name)
+        assert "title" in data
+    except:
+        raise InvalidPublicationData(msg)

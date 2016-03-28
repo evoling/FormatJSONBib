@@ -28,7 +28,10 @@ class Publication(object):
         if len(self.author) > 1:
             elements.append("et_al")
         elements.append(str(self.date))
-        title = "".join([c for c in self.title if c in ascii_letters+" "])
+        try:
+            title = "".join([c for c in self.shortTitle if c in ascii_letters+" "])
+        except AttributeError:
+            title = "".join([c for c in self.title if c in ascii_letters+" "])
         elements.append("_".join(title.split()[:4]))
         return "_".join(elements)
 
