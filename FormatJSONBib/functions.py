@@ -30,7 +30,7 @@ def transform(args):
         print(dedent("""\
                 <!--
                 .. title: Publications
-                .. slug: 
+                .. slug: publications
                 .. date: 
                 .. tags:
                 .. category:
