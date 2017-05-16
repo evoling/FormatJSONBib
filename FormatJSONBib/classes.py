@@ -4,10 +4,9 @@ from string import ascii_letters
 class Publication(object):
 
     def __init__(self, d):
-        for key in d:
-            if "-" in key:
-                d[key.replace("-","_")] = d.pop(key)
-        self.__dict__.update(d)
+        for key, value in d.items():
+            key = key.replace("-","_")
+            setattr(self, key, value)
         try:
             assert self.author
         except AttributeError:
