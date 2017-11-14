@@ -80,10 +80,10 @@ def transform(args):
             print("</li>")
         elif args.theme == "markdown":
             print('{}. {}. {}. {}'.format(
-                    pub.format_author())
+                    pub.format_author(),
                     pub.format_date(), 
                     pub.title,
-                    pub.format_source_markdown())
+                    pub.format_source_markdown()))
             if url != "#":
                 if url.lower().endswith(".pdf"):
                     print('(pdf)[{}]'.format(url))
