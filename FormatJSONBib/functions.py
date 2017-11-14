@@ -25,6 +25,7 @@ def transform(args):
                 pass
             else:
                 raise
+    is_html = args.theme in ["bootstrap3", "plain"]
 
     if args.theme == "bootstrap3":
         print(dedent("""\
@@ -40,7 +41,7 @@ def transform(args):
                 -->
                 """.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))))
         print('<div class="list-group">')
-    else:
+    elif args.theme == "plain":
         print('<ul>')
     for pub in sorted(pubs, key=lambda p: ((-1 * p.date), p.format_author())):
         url = getattr(pub, "pdf_path", None)
@@ -63,7 +64,7 @@ def transform(args):
                 print('<span class="label label-info">link</span>')
             print('</p>')
             print('</a>')
-        else: # theme == plain
+        elif args.theme == "plain": # theme == plain
             print("<li>")
             print('{}. {}. {}.'.format(pub.format_author(),
                     pub.format_date(), 
@@ -77,6 +78,18 @@ def transform(args):
                     print('<span class="label label-info">link</span>')
                 print('</a>')
             print("</li>")
+        elif args.theme == "markdown":
+            print('{}. {}. {}. {}'.format(
+                    pub.format_author())
+                    pub.format_date(), 
+                    pub.title,
+                    pub.format_source_markdown())
+            if url != "#":
+                if url.lower().endswith(".pdf"):
+                    print('(pdf)[{}]'.format(url))
+                else:
+                    print('(link)[{}]'.format(url))
+
 
     if args.theme == "bootstrap3":
         print('</div>')

@@ -85,6 +85,16 @@ class Article(Publication):
                 journal=self.container_title,
                 page=getattr(self, "page", ""))
 
+    def format_source_markdown(self):
+
+        return "*{journal}*. {volumeissue}:{page}.".format(
+                author=self.format_author(),
+                date=self.format_date(),
+                title=self.title,
+                volumeissue=self.get_volume_issue(),
+                journal=self.container_title,
+                page=getattr(self, "page", ""))
+
 class Chapter(Publication):
 
     def format_editor(self):
@@ -101,9 +111,23 @@ class Chapter(Publication):
                 publ=self.publisher,
                 page=getattr(self, "page", ""))
 
+    def format_source_markdown(self):
+
+        return "In: {editor} ({eds}) {booktitle}. {publ}.  {page}".format(
+                editor=self.format_editor(),
+                eds="editors" if len(self.editor) > 1 else "editor",
+                booktitle=self.container_title,
+                publ=self.publisher,
+                page=getattr(self, "page", ""))
+
 class Thesis(Publication):
 
     def format_source_html(self):
+        return "{genre} Dissertation, {university}.".format(
+                genre=self.genre,
+                university=self.publisher)
+
+    def format_source_markdown(self):
         return "{genre} Dissertation, {university}.".format(
                 genre=self.genre,
                 university=self.publisher)

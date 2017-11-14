@@ -21,7 +21,7 @@ def main():
     parser_transform.add_argument("-i", "--skip-invalid", action="store_true",
             help="Skip entries that cannot be parsed")
     parser_transform.add_argument("-t", "--theme", choices=["plain",
-            "bootstrap3"], default="plain", help="""Bootstrap3 theme includes
+            "bootstrap3","markdown"], default="plain", help="""Bootstrap3 theme includes
             a Nikola header, and is intended to be used as a complete page. The
             plain theme is an unordered list intended to be used as a snippet.""")
     parser_transform.set_defaults(func=transform)
