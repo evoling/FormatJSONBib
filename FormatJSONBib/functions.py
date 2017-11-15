@@ -79,21 +79,22 @@ def transform(args):
                 print('</a>')
             print("</li>")
         elif args.theme == "markdown":
-            print('{}. {}. {}. {}'.format(
+            mdstring = '{}. {}. {}. {}'.format(
                     pub.format_author(),
                     pub.format_date(), 
                     pub.title,
-                    pub.format_source_markdown()))
+                    pub.format_source_markdown())
             if url != "#":
                 if url.lower().endswith(".pdf"):
-                    print('(pdf)[{}]'.format(url))
+                    mdstring += ' [pdf]({})'.format(url)
                 else:
-                    print('(link)[{}]'.format(url))
+                    mdstring += ' [link]({})'.format(url)
+            print(mdstring, "\n")
 
 
     if args.theme == "bootstrap3":
         print('</div>')
-    else: # theme == plain
+    elif args.theme == "plain":
         print('</ul>')
     return
 
