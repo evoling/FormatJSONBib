@@ -132,6 +132,33 @@ class Thesis(Publication):
                 genre=self.genre,
                 university=self.publisher)
 
+class Book(Publication):
+    
+    def __init__(self, d):
+        for key, value in d.items():
+            key = key.replace("-","_")
+            setattr(self, key, value)
+        if hasattr(self, "editor") and not hasattr(self, "author"):
+            self.author = self.editor
+        if not hasattr(self, "author"):
+            raise InvalidPublicationData('No author or editor in "{}"'.format(
+                    d["title"]))
+        return
+
+    def format_source_html(self):
+
+        return "{place}: {publ}".format(
+                place=self.publisher_place,
+                publ=self.publisher)
+
+    def format_source_markdown(self):
+
+        return "{place}: {publ}".format(
+                place=self.publisher_place,
+                publ=self.publisher)
+
+
+
 class UnknownPublicationType(Exception):
     pass
 
@@ -143,6 +170,7 @@ def constructor(jsonobj):
             "article-journal":Article,
             "chapter":Chapter,
             "thesis":Thesis,
+            "book":Book,
             }
     pubtype = jsonobj.pop("type")
     try:

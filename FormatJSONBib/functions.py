@@ -25,9 +25,9 @@ def transform(args):
                 pass
             else:
                 raise
-    is_html = args.theme in ["bootstrap3", "plain"]
+    is_html = args.theme in ["bootstrap4", "bootstrap3", "plain"]
 
-    if args.theme == "bootstrap3":
+    if args.theme in {"bootstrap3","bootstrap4"}:
         print(dedent("""\
                 <!--
                 .. title: Publications
@@ -64,6 +64,23 @@ def transform(args):
                 print('<span class="label label-info">link</span>')
             print('</p>')
             print('</a>')
+        elif args.theme == "bootstrap4":
+            print('<a href="{}" class="list-group-item list-group-item-action flex-column align-items-start">'.format(url))
+            print('<h5 class="mb-1">{}</h5>'.format(
+                pub.title))
+            print('<p class="mb-1">')
+            print(pub.format_author())
+            print('({})'.format(pub.format_date()))
+            print(pub.format_source_html())
+            if url == "#":
+                pass
+            elif url.lower().endswith(".pdf"):
+                print('<button class="btn btn-success btn-sm">pdf</button>')
+            else:
+                print('<button class="btn btn-info btn-sm">link</button>')
+            print('</p>')
+            print('</a>')
+
         elif args.theme == "plain": # theme == plain
             print("<li>")
             print('{}. {}. {}.'.format(pub.format_author(),
@@ -92,7 +109,7 @@ def transform(args):
             print(mdstring, "\n")
 
 
-    if args.theme == "bootstrap3":
+    if args.theme in {"bootstrap3","bootstrap4"}:
         print('</div>')
     elif args.theme == "plain":
         print('</ul>')
